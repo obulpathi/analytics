@@ -1,0 +1,21 @@
+125.125.125.125 - uche [20/Jul/2008:12:30:45 +0700] "GET /index.html HTTP/1.1" 200 2345
+"http://www.ibm.com/" "Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9a8) Gecko/2007100619 GranParadiso/3.0a8" "USERID=Zepheira;IMPID=01234"
+
+Fields in a common log format line
+
+Field name      Example value                       Description
+Host            125.125.125.125	                    IP address or host name of the HTTP client that made the request
+Identity        -                                   Authentication Server Protocol (RFC 931) identifier for the client; this field is rarely used. If unused it's given as "-".
+User            uche                                HTTP authenticated user name (via 401 response handshake); this is the login and password dialog you see on some sites, as opposed to a login form embedded in a Web page, where your ID information is stored in a server-side session. If unused (for example, when the request is for an unrestricted resource) it's given as "-".
+Time            [20/Jul/2008:12:30:45 +0700]	    Date then time then timezone, in the format [dd/MMM/yyyy:hh:mm:ss +-hhmm]
+Request line	"GET /index.html HTTP/1.1"	        The leading line of the HTTP request, which includes the method ("GET"), the requested resource, and the HTTP protocol version
+status code     200	                                Numeric code used in the response to indicating the disposition of the request, for example to indicate success, failure, redirect, or authentication requirement
+bytes           562                                 Number of bytes transferred in the body of the response
+
+
+Fields in combined log format
+
+Field name      Example value                       Description
+referrer        "http://www.ibm.com/"               When a user agent follows a link from one site to another, it often reports to the second site which URL referred it.
+user agent      "Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9a8) Gecko/2007100619 GranParadiso/3.0a8"       A string providing information about the user agent that made the request (for example, a browser version or a Web crawler)
+cookie          "USERID=Zepheira;IMPID=01234"       The actual key/value pairs of any cookie that were sent by the HTTP server can send back to the client in the response.
