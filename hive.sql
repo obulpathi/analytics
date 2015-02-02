@@ -102,3 +102,25 @@ GROUP BY hour(from_unixtime(unix_timestamp(time,'[dd/MMM/yyyy:HH:mm:ss Z]')));
 SELECT path, COUNT(*) AS clicks FROM logs GROUP BY path;
 SELECT path, COUNT(*) AS clicks, SUM(size) AS bytes FROM logs GROUP BY path;
 SELECT status, COUNT(*) AS returned FROM logs GROUP BY status;
+
+Data: hadoop fs -ls /apps/hive/warehouse
+
+INSERT OVERWRITE LOCAL DIRECTORY '/root/analytics/country'
+SELECT country, COUNT(*) FROM logs GROUP BY country
+FIELDS TERMINATED BY ',';
+
+INSERT OVERWRITE LOCAL DIRECTORY '/root/analytics/browser'
+SELECT browser, COUNT(*) FROM logs GROUP BY browser;
+
+INSERT OVERWRITE LOCAL DIRECTORY '/root/analytics/day'
+SELECT day(from_unixtime(unix_timestamp(time,'[dd/MMM/yyyy:HH:mm:ss Z]'))), COUNT(*)
+FROM logs
+GROUP BY day(from_unixtime(unix_timestamp(time,'[dd/MMM/yyyy:HH:mm:ss Z]')));
+
+-- Load data in MySQL
+SHOW DATABASES;
+CREATE DATABASE analytics;
+SHOW TABLES;
+CREATE TABLE country (name VARCHAR(20), owner VARCHAR(20));
+
+LOAD DATA INFILE '/root/analytics/country/000000_0' INTO TABLE country;
