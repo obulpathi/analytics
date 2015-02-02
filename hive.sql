@@ -7,12 +7,14 @@
 -- Copy data into HDFS
 hadoop fs -ls
 hadoop fs -copyFromLocal apache.log apache.log
+hadoop fs -ls
 
 
 Hive
 Libraries: ls /usr/lib/hive/lib
 
 
+LIST JARS;
 ADD JAR /usr/lib/hive/lib/hive-contrib.jar;
 LIST JARS;
 
@@ -35,6 +37,39 @@ WITH SERDEPROPERTIES (
   "input.regex" = "([^ ]*) ([^ ]*) ([^ ]*) (-|\\[[^\\]]*\\]) ([^ \"]*|\"[^\"]*\") (-|[0-9]*) (-|[0-9]*)?",
   "output.format.string" = "%1$s %2$s %3$s %4$s %5$s %6$s %7$s");
 
+CREATE TABLE logs(
+    host STRING,
+    country STRING,
+    browser STRING,
+    time STRING,
+    method STRING,
+    url STRING,
+    protocol STRING,
+    status STRING,
+    size STRING)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.contrib.serde2.RegexSerDe'
+WITH SERDEPROPERTIES (
+    "input.regex" = "([^ ]*) ([^ ]*) ([^ ]*) (-|\\[[^\\]]*\\]) \"([^ ]*) ([^ ]*) ([^ ]*)\" (-|[0-9]*) (-|[0-9]*)?",
+    "output.format.string" = "%1$s %2$s %3$s %4$s %5$s %6$s %7$s %8$s %9$s");
+
+CREATE TABLE logs(
+    host STRING,
+    country STRING,
+    browser STRING,
+    time STRING,
+    method STRING,
+    path STRING,
+    query STRING,
+    protocol STRING,
+    status STRING,
+    size STRING)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.contrib.serde2.RegexSerDe'
+WITH SERDEPROPERTIES (
+    "input.regex" = "([^ ]*) ([^ ]*) ([^ ]*) (-|\\[[^\\]]*\\]) \"([^ ]*) ([^ \\?]*)(\\?[^ ]*)? ([^\"]*)\" (-|[0-9]*) (-|[0-9]*)?",
+    "output.format.string" = "%1$s %2$s %3$s %4$s %5$s %6$s %7$s %8$s %9$s %10$s");
+
+64.242.88.10 USA Opera [07/Mar/2004:22:03:19 -0800] "GET /twiki/bin/rdiff/Main/VishaalGolam HTTP/1.1" 200 5055
+64.242.88.10 USA Opera [07/Mar/2004:22:04:44 -0800] "GET /twiki/bin/view/Main/TWikiUsers?rev=1.21 HTTP/1.1" 200 6522
 
 -- Load data into table
 LOAD DATA INPATH 'apache.log' INTO TABLE logs;
@@ -42,7 +77,7 @@ LOAD DATA INPATH 'apache.log' INTO TABLE logs;
 
 
 -- Sample Query
-SELECT * FROM logs WHERE browser = 'Firefox' LIMIT 2;
+SELECT * FROM logs WHERE browser = 'Firefox' LIMIT 20;
 
 
 -- Lets query
@@ -64,4 +99,6 @@ GROUP BY hour(from_unixtime(unix_timestamp(time,'[dd/MMM/yyyy:HH:mm:ss Z]')));
 
 
 -- URL
-SELECT COUNT(DISTINCT url) FROM logs;
+SELECT path, COUNT(*) AS clicks FROM logs GROUP BY path;
+SELECT path, COUNT(*) AS clicks, SUM(size) AS bytes FROM logs GROUP BY path;
+SELECT status, COUNT(*) AS returned FROM logs GROUP BY status;
